@@ -1,5 +1,8 @@
 # Uptime Kuma with Tailscale Dockerfile (AMD64/ARM64/ARM(v7))
 
+> [!NOTE]
+> This is a modified fork of SGprooo/Uptime-Kuma-Tailscale-Docker to include the ability to build the image automatically every week and publish stable and beta version of Uptime Kuma.
+
 **Work in progress - Though the dockerfile builds and runs fine at its current state**
 
 This Dockerfile is your ticket to building a docker image for [Uptime Kuma](https://github.com/louislam/uptime-kuma) with [Tailscale](https://tailscale.com) support; Uptime Kuma is a self-hosted monitoring tool, and Tailscale is a zero config VPN, making this combination a pretty useful one.
@@ -7,6 +10,34 @@ This Dockerfile is your ticket to building a docker image for [Uptime Kuma](http
 The Dockerfile provided always fetches the latest version of each image during the build, I'm still working on pinning a working version. (fallback for when the "latest" build fails)
 
 ## Getting Started
+
+### Docker compose
+
+Here's a sample docker-compose file to get you started:
+
+```yaml
+services:
+  uptime-kuma-tailscale:
+    image: alex21t/uptime-kuma-tailscale-docker:beta
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    environment:
+      - TS_AUTHKEY=***
+      - TS_HOSTNAME=uptime-kuma
+    ports:
+      - '3002:3001'
+    volumes:
+      - uptime-kuma:/app/data
+      - tailscale_state:/var/lib/tailscale
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+volumes:
+  tailscale_state: Null
+```
+
+### Docker run
 
 **1. Clone the Repository**
 
@@ -29,7 +60,7 @@ docker build -t uptime-kuma-tailscale-docker .
 Launch the Docker container with this command:
 
 ```bash
-docker run -d --restart=always -p 3001:3001 --device /dev/net/tun:/dev/net/tun --cap-add=NET_ADMIN -v uptime-kuma:/app/data --name uptime-kuma -e TSKEY=YOUR_TAILSACLE_API_KEY -e TS_HOSTNAME=YOUR_HOSTNAME uptime-kuma-tailscale
+docker run -d --restart=always -p 3001:3001 --device /dev/net/tun:/dev/net/tun --cap-add=NET_ADMIN -v uptime-kuma:/app/data --name uptime-kuma -e TS_AUTHKEY=YOUR_TAILSACLE_API_KEY -e TS_HOSTNAME=YOUR_HOSTNAME uptime-kuma-tailscale
 ```
 **Replace** `YOUR_TAILSACLE_API_KEY` and `YOUR_HOSTNAME` with your Tailscale API key and desired hostname respectively. The hostname defaults to `TailscaleUptimeKuma` if not specified. You can generate a API key [here](https://login.tailscale.com/admin/settings/keys).
 

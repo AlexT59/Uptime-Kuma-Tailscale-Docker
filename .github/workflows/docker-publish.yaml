@@ -1,0 +1,77 @@
+name: Docker Build and Publish
+
+on:
+  schedule:
+    - cron: '0 0 * * 0'
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/README.md'
+      - '**/LICENSE'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/README.md'
+      - '**/LICENSE'
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: alex21t/uptime-kuma-tailscale
+
+jobs:
+  # define job to build and publish docker image
+  build-and-push-docker-image:
+    name: Build Docker image and push to DockerHub
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      # https://github.com/docker/login-action
+      - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image - stable
+        id: build-and-push-stable
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: docker.io/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+    
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image - beta
+        id: build-and-push-beta
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: UPTIME_KUMA_VERSION=beta
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: docker.io/${{ env.IMAGE_NAME }}:beta
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # https://github.com/peter-evans/dockerhub-description
+      - name: Update repo description
+        if: github.event_name != 'pull_request'
+        uses: peter-evans/dockerhub-description@v4
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          repository: ${{ env.IMAGE_NAME }}
+
+      - name: Image digest
+        run: echo ${{ steps.build-and-push.outputs.digest }}

@@ -1,9 +1,10 @@
+ARG TAILSCALE_VERSION=stable
+ARG UPTIME_KUMA_VERSION=stable
+
 # Added validator stage to resolve correct build context
-FROM alpine as validator
+FROM alpine AS validator
 # Define target platform on versions of Tailscale and Uptime Kuma
 ARG TARGETPLATFORM
-ARG TAILSCALE_VERSION=latest
-ARG UPTIME_KUMA_VERSION=latest
 
 # Validate the target platform and convert user-specified platform to a standard format
 # Exit if the platform is not detected or unsupported
@@ -19,11 +20,11 @@ RUN SUPPORTED_ARCHITECTURES='AMD64, ARM64, ARM(v7)' \
     esac
 
 # Define a Tailscale stage to fetch the latest Tailscale package for the target platform
-FROM --platform=${TARGETPLATFORM} tailscale/tailscale:stable as tailscale
+FROM --platform=${TARGETPLATFORM} tailscale/tailscale:${TAILSCALE_VERSION} AS tailscale
 
 # The second stage of multi-stage build
 # Define the main build stage Using Uptime Kuma image
-FROM --platform=${TARGETPLATFORM} louislam/uptime-kuma:latest
+FROM --platform=${TARGETPLATFORM} louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
 # Install necessary packages and clean up
 RUN apt-get update && apt-get install -y ca-certificates iptables \
     && rm -rf /var/lib/apt/lists/*
