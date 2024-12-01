@@ -1,5 +1,5 @@
 ARG TAILSCALE_VERSION=stable
-ARG UPTIME_KUMA_VERSION=stable
+ARG UPTIME_KUMA_VERSION=latest
 
 # Added validator stage to resolve correct build context
 FROM alpine AS validator
