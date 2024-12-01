@@ -64,14 +64,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # https://github.com/peter-evans/dockerhub-description
-      - name: Update repo description
-        if: github.event_name != 'pull_request'
-        uses: peter-evans/dockerhub-description@v4
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-          repository: ${{ env.IMAGE_NAME }}
-
       - name: Image digest
         run: echo ${{ steps.build-and-push.outputs.digest }}

@@ -1,4 +1,8 @@
-# Uptime Kuma with Tailscale Dockerfile (AMD64/ARM64/ARM(v7))
+# Uptime Kuma with Tailscale Dockerfile
+
+![Build status](https://img.shields.io/github/actions/workflow/status/alexT59/Uptime-Kuma-Tailscale-Docker/docker-publish.yaml)
+[![Docker build date - latest](https://img.shields.io/badge/dynamic/json?color=blue&label=Docker%20build%20-%20latest&url=https%3A%2F%2Fhub.docker.com%2Fv2%2Frepositories%2Falex21t%2Fuptime-kuma-tailscale%2Ftags%2Flatest&query=%24.last_updated)](https://hub.docker.com/r/alex21t/uptime-kuma-tailscale)
+[![Docker build date - beta](https://img.shields.io/badge/dynamic/json?color=blue&label=Docker%20build%20-%20beta&url=https%3A%2F%2Fhub.docker.com%2Fv2%2Frepositories%2Falex21t%2Fuptime-kuma-tailscale%2Ftags%2Fbeta&query=%24.last_updated)](https://hub.docker.com/r/alex21t/uptime-kuma-tailscale)
 
 > [!NOTE]
 > This is a modified fork of SGprooo/Uptime-Kuma-Tailscale-Docker to include the ability to build the image automatically every week and publish stable and beta version of Uptime Kuma.
