@@ -3,28 +3,13 @@ ARG UPTIME_KUMA_VERSION=stable
 
 # Added validator stage to resolve correct build context
 FROM alpine AS validator
-# Define target platform on versions of Tailscale and Uptime Kuma
-ARG TARGETPLATFORM
-
-# Validate the target platform and convert user-specified platform to a standard format
-# Exit if the platform is not detected or unsupported
-RUN SUPPORTED_ARCHITECTURES='AMD64, ARM64, ARM(v7)' \
-    && SUPPORTED_MESSAGE="This Dockerfile supports ${SUPPORTED_ARCHITECTURES} architectures that Uptime Kuma supports. Please specify one of the supported architectures in your build command with --platform=" \
-    && if [ -z "${TARGETPLATFORM}" ]; then echo "Target platform could not be detected. ${SUPPORTED_MESSAGE} AMD64, ARM64, or ARM." ; exit 1 ; fi \
-    && TARGETPLATFORM=$(echo ${TARGETPLATFORM} | tr '[:upper:]' '[:lower:]' | tr -d '()') \
-    && case ${TARGETPLATFORM} in \
-      'amd64') export TARGETPLATFORM='linux/amd64' ;; \
-      'arm64') export TARGETPLATFORM='linux/arm64' ;; \
-      'arm'|'armv7'|'arm7') export TARGETPLATFORM='linux/arm/v7' ;; \
-      *) echo "You specified an unsupported platform: ${TARGETPLATFORM}. ${SUPPORTED_MESSAGE}" ; exit 1 ;; \
-    esac
 
 # Define a Tailscale stage to fetch the latest Tailscale package for the target platform
-FROM --platform=${TARGETPLATFORM} tailscale/tailscale:${TAILSCALE_VERSION} AS tailscale
+FROM tailscale/tailscale:${TAILSCALE_VERSION} AS tailscale
 
 # The second stage of multi-stage build
 # Define the main build stage Using Uptime Kuma image
-FROM --platform=${TARGETPLATFORM} louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
+FROM louislam/uptime-kuma:${UPTIME_KUMA_VERSION}
 # Install necessary packages and clean up
 RUN apt-get update && apt-get install -y ca-certificates iptables \
     && rm -rf /var/lib/apt/lists/*
